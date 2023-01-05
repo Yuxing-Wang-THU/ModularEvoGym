@@ -4,12 +4,16 @@ This is a modified benchmark which provides a modular soft robot design space an
 **New features**:
 
 <font color=Blue>Design (optional):</font>
-A modular design space for VSRs which can be incorporated into the Reinforcement Learning process.
-A designer (design policy network) based on Neural Cellular Automata (NCA).
+
+1. A modular design space for VSRs which can be incorporated into the Reinforcement Learning process.
+
+2. A universal **Designer** (design policy network) based on Neural Cellular Automata (NCA).
 
 <font color=Blue>Control:</font>
-A modular state-action space for VSRs.
-A universal Transformer-based controller (control policy network) which can be trained by PPO（Proximal Policy Optimization).
+
+1. A modular state-action space for VSRs.
+
+2. A universal Transformer-based **Controller** (control policy network) which can be trained by Proximal Policy Optimization (PPO).
 
 ## 1. Original Observation of EvolutionGym
 
