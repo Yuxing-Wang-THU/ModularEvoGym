@@ -1,7 +1,7 @@
 # ModularEvoGym
 This is a modified benchmark which provides a modular soft robot design space and a modular state-action space for designing and controlling 2D Voxel-based Soft Robots (VSRs). ModularEvoGym is based on [EvolutionGym](https://github.com/EvolutionGym/evogym)
 
-**New features**:
+## New features
 
 <font color=Blue>Design (optional):</font>
 
@@ -15,6 +15,6 @@ This is a modified benchmark which provides a modular soft robot design space an
 
 2. A universal Transformer-based **Controller** (control policy network) which can be trained by Proximal Policy Optimization (PPO).
 
-## 1. Original Observation of EvolutionGym
+### Original Observation of EvolutionGym
 
 ![image](evogym.jpg)
