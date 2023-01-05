@@ -15,6 +15,11 @@ This is a modified benchmark which provides a modular soft robot design space an
 
 2. A universal Transformer-based **Controller** (control policy network) which can be trained by Proximal Policy Optimization (PPO).
 
-### Original Observation of EvolutionGym
+## 1. Original Observation Space of EvolutionGym
 
 ![image](evogym.jpg)
+
+## 2. State-Action Space of ModularEvoGym
+
+
+## 3. Controlling VSRs via Transformer
