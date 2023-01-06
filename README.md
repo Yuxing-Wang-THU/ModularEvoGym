@@ -25,4 +25,6 @@ This is a modified benchmark which provides a modular soft robot design space an
 
 
 ## 3. Controlling VSRs via Transformer
-We provide a universal Transformer-based controller which can handle the incompatible state-action spaces
+We provide a universal Transformer-based controller which can handle the incompatible state-action spaces. This controller can be trained by many popular Reinforcement Learning methods (e.g., SAC, PPO, DDPG).
+
+![image](tf-controller.png)
