@@ -1,5 +1,5 @@
 # ModularEvoGym
-This is a modified benchmark which provides a modular soft robot design space and a modular state-action space for designing and controlling 2D Voxel-based Soft Robots (VSRs). ModularEvoGym is based on [EvolutionGym.](https://github.com/EvolutionGym/evogym)
+This is a modified benchmark that provides a modular soft robot design space and a modular state-action space for designing and controlling 2D Voxel-based Soft Robots (VSRs). ModularEvoGym is based on [EvolutionGym.](https://github.com/EvolutionGym/evogym)
 
 ![image](https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/thrower.gif)
 
