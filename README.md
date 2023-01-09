@@ -104,3 +104,6 @@ Self-attention brings better interpretability than multilayer perceptron. We use
 ![image](attention.png)
 
 The color of each attention score tells the strength of the compatibility between inputs and interprets what is driving the behaviour of the VSR. When the robot’s front foot (voxel 9) or the rear foot (voxel 7) touches the ground, the corresponding voxels are assigned with greater wights, which is consistent with humans’ intuition and common sense.
+
+
+## References
