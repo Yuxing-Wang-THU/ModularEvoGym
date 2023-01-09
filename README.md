@@ -79,7 +79,7 @@ if __name__ == '__main__':
     mode = "modular"
     body_size = (3,3)
     body, connections = sample_robot(body_size)
-    # Removing the "mode" option, the environment will be the original EvolutionGym
+    # If you want to use the original EvolutionGym, just remove the "mode" option 
     env = gym.make('Walker-v0', body=body, mode=mode)
     obs = env.reset()
 
