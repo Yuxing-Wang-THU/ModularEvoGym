@@ -26,7 +26,75 @@ This is a modified benchmark that provides a modular soft robot design space and
 
 The input state of the robot at time step $t$ is represented as $s_{t}^{c}=\lbrace s_{t}^{v},s_{t}^{g}\rbrace$, where $s_{t}^{v}=\lbrace s_{t}^{v_{1}}, s_{t}^{v_{2}},...,s_{t}^{v_N}\rbrace$, $s_{t}^{v_i}$ is composed of each voxel's local information which contains the relative position of its four corners with respect to the center of mass of the robot and its material information (e.g., <b><font color=Gray>soft voxel</font></b>, <b>rigid voxel</b>, <b><font color=Darkorange>horizontal actuator</font></b> and <b><font color=DeepSkyBlue>vertical actuator</font></b>). $s_{t}^{g}$ is the task-related observation such as terrain information of the environment and goal-relevant information. During the simulation, voxels (except empty voxels) only sense locally, and based on the input sensory information, a controller outputs control signals to vary the volume of actuator voxels. The morphology of the robot is unchangeable during the interaction with the environment.
 
-## 3. Controlling VSRs via Transformer
+## Installation
+Clone:
+
+```shell
+git clone https://github.com/Yuxing-Wang-THU/ModularEvoGym.git
+```
+### Requirements
+
+* Python 3.7/3.8
+* Linux, macOS, or Windows with [Visual Studios 2017](https://visualstudio.microsoft.com/vs/older-downloads/)
+* [OpenGL](https://www.opengl.org//)
+* [CMake](https://cmake.org/download/)
+* [PyTorch](http://pytorch.org/)
+
+<!--- (See [installation instructions](#opengl-installation-on-unix-based-systems) on Unix based systems) --->
+
+On **Linux**:
+
+```shell
+sudo apt-get install xorg-dev libglu1-mesa-dev
+```
+
+Install Python dependencies with conda:
+
+```shell
+conda env create -f environment.yml
+```
+### Build and Install Package
+
+To build the C++ simulation, build all the submodules, and install `evogym` run the following command:
+
+```shell
+python setup.py install
+``` 
+
+### Test Installation
+
+cd to the `examples` folder and run the following script:
+
+```shell
+python gym_test.py
+```
+gym_test.py
+```python
+import gym
+import modularevogym.envs
+from modularevogym import sample_robot
+import numpy as np
+
+if __name__ == '__main__':
+    # modular: ModularEvogym  normal: Evolutiongym
+    mode = "modular"
+    body_size = (3,3)
+    body, connections = sample_robot(body_size)
+    env = gym.make('Walker-v0', body=body, mode=mode)
+    obs = env.reset()
+
+    while True:
+        if mode == 'modular':
+            action = np.random.uniform(low=0.6, high=1.6, size=body_size[0]*body_size[1])-1
+        else:
+            action = env.action_space.sample()-1
+        ob, reward, done, info = env.step(action)
+        if done:
+            break
+
+    env.close()
+```
+## Controlling VSRs via Transformer
 We provide a universal Transformer-based controller which can handle the incompatible state-action spaces. This controller can be trained by many popular Reinforcement Learning methods (e.g., SAC, PPO, DDPG).
 
 ![image](tf-controller.png)
