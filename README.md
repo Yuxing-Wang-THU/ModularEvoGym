@@ -76,10 +76,10 @@ from modularevogym import sample_robot
 import numpy as np
 
 if __name__ == '__main__':
-    # modular: ModularEvogym  normal: Evolutiongym
     mode = "modular"
     body_size = (3,3)
     body, connections = sample_robot(body_size)
+    # Removing the "mode" option, the environment will be the original EvolutionGym
     env = gym.make('Walker-v0', body=body, mode=mode)
     obs = env.reset()
 
