@@ -7,7 +7,7 @@ This is a modified benchmark that provides a modular soft robot design space and
 
 <font color=Blue>Design (optional):</font>
 
-1. A modular design space for VSRs which can be incorporated into the Reinforcement Learning process.
+1. A modular design space which can be incorporated into the Reinforcement Learning process.
 
 2. A universal **Designer** (design policy network) based on Neural Cellular Automata (NCA).
 
