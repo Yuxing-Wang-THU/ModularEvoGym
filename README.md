@@ -1,5 +1,5 @@
 # ModularEvoGym (Continuous updating)
-This is a modified benchmark that provides a modular soft robot design space and a modular state-action space for designing and controlling 2D Voxel-based Soft Robots (VSRs). ModularEvoGym is based on [EvolutionGym.](https://github.com/EvolutionGym/evogym)
+This is a modified benchmark that provides a modular soft robot design space and a modular state-action space for designing and controlling 2D Voxel-based Soft Robots (VSRs). ModularEvoGym is based on [EvolutionGym [1].](https://github.com/EvolutionGym/evogym)
 
 ![image](https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/thrower.gif)
 
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     env.close()
 ```
 ## Controlling VSRs via Transformer
-We provide a universal Transformer-based controller which can handle the incompatible state-action spaces. This controller can be trained by many popular Reinforcement Learning methods (e.g., SAC, PPO, DDPG).
+We provide a universal Transformer-based controller [2-3] which can handle the incompatible state-action spaces. This controller can be trained by many popular Reinforcement Learning methods (e.g., SAC, PPO, DDPG).
 
 ### **Controller**
 
