@@ -101,7 +101,7 @@ if __name__ == '__main__':
             break
     env.close()
 ```
-## Controlling VSRs via Transformer
+## Controlling Modular Soft Robots via Transformer
 We provide a universal Transformer-based controller [2-3] which can handle the incompatible state-action spaces. This controller can be trained by many popular Reinforcement Learning methods (e.g., SAC, PPO, DDPG).
 
 ### **Controller**
