@@ -1,6 +1,0 @@
-[submodule "evogym/simulator/glew"]
-	path = evogym/simulator/glew
-	url = https://github.com/Perlmint/glew-cmake.git
-[submodule "evogym/simulator/pybind11"]
-	path = evogym/simulator/pybind11
-	url = https://github.com/pybind/pybind11.git
