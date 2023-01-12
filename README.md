@@ -126,7 +126,7 @@ The color of each attention score tells the strength of the compatibility betwee
 
 ### **RL Training**
 
-#### Controlling a single VSR 
+#### 1. Controlling a single VSR 
 To train a predefined agent to walk, cd to the `examples` folder and run the following script:
 
 ```shell
@@ -149,7 +149,7 @@ python simple_gif.py
 ![image](https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/images/walker.gif)
 
 
-#### Controlling many VSRs using one controller
+#### 2. Controlling many VSRs using one controller
 
 
 ## References
