@@ -60,6 +60,10 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
 
 pip install Gpy==1.10.0 -i https://pypi.tuna.tsinghua.edu.cn/simple/
 
+pip install git+https://github.com/yunshengtian/GPyOpt.git
+
+pip install git+https://github.com/yunshengtian/neat-python.git
+
 ```
 To build the C++ simulation, build all the submodules, and install `evogym` run the following command:
 
@@ -122,7 +126,28 @@ The color of each attention score tells the strength of the compatibility betwee
 
 ### **RL Training**
 
+#### Controlling a single VSR 
+To train a predefined agent to walk, cd to the `examples` folder and run the following script:
+
+```shell
+python run_transformer_ppo.py
+```
+
+The training logs are stored in "./saved_data/Walker-v0", a trained model is stored in "./visual". Running the following script to visualize the training process:
+
+```shell
+python simple_plotter.py
+```
 <img src="https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/images/Walker-v0_training_curves.png" div align=middle width = "37%" />
+
+To make a gif
+
+```shell
+python simple_gif.py
+```
+
+#### Controlling many VSRs using one controller
+
 
 ## References
 
