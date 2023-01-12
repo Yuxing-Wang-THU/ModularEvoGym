@@ -49,13 +49,16 @@ Requirements：
 sudo apt-get install xorg-dev libglu1-mesa-dev
 ```
 
-Install Python dependencies with conda:
+Install Python dependencies:
 
 ```shell
-conda env create -f environment.yml
-```
-Build and Install Package
+conda create -n modularevogym python==3.7.11
 
+conda activate modularevogym
+
+pip install -r requirements.txt
+
+```
 To build the C++ simulation, build all the submodules, and install `evogym` run the following command:
 
 ```shell
