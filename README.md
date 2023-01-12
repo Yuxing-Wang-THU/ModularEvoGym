@@ -32,7 +32,7 @@ The input state of the robot at time step $t$ is represented as $s_{t}^{c}=\lbra
 ### 1. Clone
 
 ```shell
-git clone https://github.com/Yuxing-Wang-THU/ModularEvoGym.git
+git clone --recurse-submodules https://github.com/Yuxing-Wang-THU/ModularEvoGym.git
 ```
 ### 2. Install Evogym
 
