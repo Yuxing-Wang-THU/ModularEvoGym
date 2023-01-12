@@ -58,6 +58,8 @@ conda activate modularevogym
 
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
 
+pip install Gpy==1.10.0 -i https://pypi.tuna.tsinghua.edu.cn/simple/
+
 ```
 To build the C++ simulation, build all the submodules, and install `evogym` run the following command:
 
