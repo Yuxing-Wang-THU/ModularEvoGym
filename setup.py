@@ -59,15 +59,15 @@ class CMakeBuild(build_ext):
 
 
 setup(
-    name="modularevogym",
-    packages=['modularevogym', 'modularevogym.envs'],
+    name="evogym",
+    packages=['evogym', 'evogym.envs'],
     package_dir={
-        'modularevogym': 'modularevogym',
-        'modularevogym.envs': 'modularevogym/envs'},
+        'evogym': 'evogym',
+        'evogym.envs': 'evogym/envs'},
     package_data={
-        "modularevogym.envs": [os.path.join('sim_files', '*.json')] #["*.json", "*.sob"],
+        "evogym.envs": [os.path.join('sim_files', '*.json')] #["*.json", "*.sob"],
     },
-    ext_modules=[CMakeExtension('modularevogym.simulator_cpp', 'modularevogym/simulator')],
+    ext_modules=[CMakeExtension('evogym.simulator_cpp', 'evogym/simulator')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
 )
