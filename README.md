@@ -1,7 +1,7 @@
 # ModularEvoGym
-ModularEvoGym is a modified benchmark that provides a modular soft robot design space and a modular state-action space for designing and controlling 2D Voxel-based Soft Robots (VSRs).
+ModularEvoGym is a modified benchmark that provides a modular design space and a modular state-action space for designing and controlling 2D Voxel-based Soft Robots (VSRs).
 
-ModularEvoGym is based on [EvolutionGym [1].](https://github.com/EvolutionGym/evogym)
+ModularEvoGym is based on [EvolutionGym [1]](https://github.com/EvolutionGym/evogym)
 
 ![image](https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/images/thrower.gif)
 
@@ -121,6 +121,8 @@ Self-attention brings better interpretability than multilayer perceptron. We use
 The color of each attention score tells the strength of the compatibility between inputs and interprets what is driving the behaviour of the VSR. When the robot’s front foot (voxel 9) or the rear foot (voxel 7) touches the ground, the corresponding voxels are assigned with greater wights, which is consistent with humans’ intuition and common sense.
 
 ### **RL Training**
+
+<img src="https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/images/Walker-v0_training_curves.png" div align=middle width = "37%" />
 
 ## References
 
