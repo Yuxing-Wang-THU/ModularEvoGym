@@ -34,9 +34,9 @@ The input state of the robot at time step $t$ is represented as $s_{t}^{c}=\lbra
 ```shell
 git clone https://github.com/Yuxing-Wang-THU/ModularEvoGym.git
 ```
-### Install Evogym
+### 2. Install Evogym
 
-Requirements
+Requirements：
 * Python 3.7/3.8
 * Linux
 * [OpenGL](https://www.opengl.org//)
@@ -54,7 +54,7 @@ Install Python dependencies with conda:
 ```shell
 conda env create -f environment.yml
 ```
-### Build and Install Package
+Build and Install Package
 
 To build the C++ simulation, build all the submodules, and install `evogym` run the following command:
 
@@ -62,7 +62,7 @@ To build the C++ simulation, build all the submodules, and install `evogym` run 
 python setup.py install
 ``` 
 
-### Test Installation
+### 3. Test Installation
 
 cd to the `examples` folder and run the following script:
 
