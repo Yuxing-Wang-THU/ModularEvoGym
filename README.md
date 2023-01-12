@@ -38,7 +38,7 @@ git clone --recurse-submodules https://github.com/Yuxing-Wang-THU/ModularEvoGym.
 
 Requirements：
 * Python 3.7/3.8
-* Linux
+* Linux (Ubuntu)
 * [OpenGL](https://www.opengl.org//)
 * [CMake](https://cmake.org/download/)
 * [PyTorch](http://pytorch.org/)
