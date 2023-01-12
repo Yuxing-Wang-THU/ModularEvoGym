@@ -146,6 +146,9 @@ To make a gif
 python simple_gif.py
 ```
 
+![image](https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/images/walker.gif)
+
+
 #### Controlling many VSRs using one controller
 
 
