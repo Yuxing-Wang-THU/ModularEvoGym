@@ -1,5 +1,5 @@
-# ModularEvoGym (Continuous updating)
-This is a modified benchmark that provides a modular soft robot design space and a modular state-action space for designing and controlling 2D Voxel-based Soft Robots (VSRs). ModularEvoGym is based on [EvolutionGym [1].](https://github.com/EvolutionGym/evogym)
+# ModularEvoGym
+ModularEvoGym is a modified benchmark that provides a modular soft robot design space and a modular state-action space for designing and controlling 2D Voxel-based Soft Robots (VSRs). ModularEvoGym is based on [EvolutionGym [1].](https://github.com/EvolutionGym/evogym)
 
 ![image](https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/images/thrower.gif)
 
@@ -7,7 +7,7 @@ This is a modified benchmark that provides a modular soft robot design space and
 
 <font color=Blue>Design (optional):</font>
 
-1. A modular design space which can be incorporated into the Reinforcement Learning process.
+1. A modular design space that can be incorporated into the Reinforcement Learning process.
 
 2. A universal **Designer** (design policy network) based on Neural Cellular Automata (NCA).
 
@@ -27,22 +27,21 @@ This is a modified benchmark that provides a modular soft robot design space and
 The input state of the robot at time step $t$ is represented as $s_{t}^{c}=\lbrace s_{t}^{v},s_{t}^{g}\rbrace$, where $s_{t}^{v}=\lbrace s_{t}^{v_{1}}, s_{t}^{v_{2}},...,s_{t}^{v_N}\rbrace$, $s_{t}^{v_i}$ is composed of each voxel's local information which contains the relative position of its four corners with respect to the center of mass of the robot and its material information (e.g., <b><font color=Gray>soft voxel</font></b>, <b>rigid voxel</b>, <b><font color=Darkorange>horizontal actuator</font></b> and <b><font color=DeepSkyBlue>vertical actuator</font></b>). $s_{t}^{g}$ is the task-related observation such as terrain information of the environment and goal-relevant information. During the simulation, voxels (except empty voxels) only sense locally, and based on the input sensory information, a controller outputs control signals to vary the volume of actuator voxels. The morphology of the robot is unchangeable during the interaction with the environment.
 
 ## Installation
-Clone:
+### 1. Clone
 
 ```shell
 git clone https://github.com/Yuxing-Wang-THU/ModularEvoGym.git
 ```
-### Requirements
+### Install Evogym
 
+Requirements
 * Python 3.7/3.8
-* Linux, macOS, or Windows with [Visual Studios 2017](https://visualstudio.microsoft.com/vs/older-downloads/)
+* Linux
 * [OpenGL](https://www.opengl.org//)
 * [CMake](https://cmake.org/download/)
 * [PyTorch](http://pytorch.org/)
 
 <!--- (See [installation instructions](#opengl-installation-on-unix-based-systems) on Unix based systems) --->
-
-On **Linux**:
 
 ```shell
 sudo apt-get install xorg-dev libglu1-mesa-dev
