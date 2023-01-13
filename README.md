@@ -127,7 +127,7 @@ The color of each attention score tells the strength of the compatibility betwee
 ### **RL Training**
 
 #### 1. Controlling a single VSR 
-To train a predefined agent to walk, cd to the `examples` folder and run the following script:
+To train a predefined robot to walk, cd to the `examples` folder and run the following script:
 
 ```shell
 python run_transformer_ppo.py
@@ -149,8 +149,20 @@ python simple_gif.py
 ![image](https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/images/walker.gif)
 
 
-#### 2. Controlling many VSRs using one controller
+#### 2. Controlling multiple VSRs using one controller
 
+To train some randomly sampled robots to walk, cd to the `examples` folder and run the following script:
+
+```shell
+python run_transformer_ppo_multi.py
+```
+Morphologies
+
+![image](images/multi.png)
+
+Learning curves
+
+<img src="https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/images/multi_robots.png" div align=middle width = "57%" />
 
 ## References
 
