@@ -133,14 +133,14 @@ To train a predefined agent to walk, cd to the `examples` folder and run the fol
 python run_transformer_ppo.py
 ```
 
-The training logs are stored in "./saved_data/Walker-v0", a trained model is stored in "./visual". Running the following script to visualize the training process:
+Logs are stored in "examples/saved_data/Walker-v0" and a trained model is stored in "examples/visual". Running the following script to visualize the training process:
 
 ```shell
 python simple_plotter.py
 ```
 <img src="https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/images/Walker-v0_training_curves.png" div align=middle width = "37%" />
 
-To make a gif
+To make a gif:
 
 ```shell
 python simple_gif.py
