@@ -34,6 +34,8 @@ The input state of the robot at time step $t$ is represented as $s_{t}^{c}=\lbra
 ```shell
 git clone --recurse-submodules https://github.com/Yuxing-Wang-THU/ModularEvoGym.git
 ```
+make sure that submodules (glfw, glew and pybind11) are successfully downloaded to "/evogym/simulator/externals"
+
 ### 2. Install Evogym
 
 Requirements：
@@ -69,6 +71,11 @@ To build the C++ simulation, build all the submodules, and install `evogym` run 
 
 ```shell
 python setup.py install
+``` 
+if you meet this error "Could NOT find GLEW (missing: GLEW_INCLUDE_DIRS GLEW_LIBRARIES)", run
+
+```shell
+sudo apt install libglew-dev
 ``` 
 
 ### 3. Test Installation
@@ -133,7 +140,9 @@ To train a predefined robot to walk, cd to the `examples` folder and run the fol
 python run_transformer_ppo.py
 ```
 
-Logs are stored in "examples/saved_data/Walker-v0" and a trained model is stored in "examples/visual". Running the following script to visualize the training process:
+Logs are stored in "examples/saved_data/Walker-v0" and a trained model is stored in "examples/visual".
+
+To visualize the training process:
 
 ```shell
 python simple_plotter.py
