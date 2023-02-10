@@ -173,6 +173,21 @@ Learning curves
 
 <img src="https://github.com/Yuxing-Wang-THU/ModularEvoGym/blob/main/images/multi_robots.png" div align=middle width = "57%" />
 
+## Citation
+
+```shell
+
+@inproceedings{
+wang2023curriculumbased,
+title={Curriculum-based Co-design of Morphology and Control of Voxel-based Soft Robots},
+author={Yuxing Wang and Shuang Wu and Haobo Fu and QIANG FU and Tiantian Zhang and Yongzhe Chang and Xueqian Wang},
+booktitle={International Conference on Learning Representations},
+year={2023},
+url={https://openreview.net/forum?id=r9fX833CsuN}
+}
+
+```
+
 ## References
 
 [1] Jagdeep Bhatia, Holly Jackson, Yunsheng Tian, Jie Xu, and Wojciech Matusik. Evolution gym: A large-scale benchmark for evolving soft robots. In NeurIPS, 2021.
