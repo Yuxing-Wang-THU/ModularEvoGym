@@ -9,10 +9,11 @@ curr_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.join(curr_dir, '..')
 sys.path.insert(0, root_dir)
 
-from modular_envs.wrappers.modular_wrapper import modular_env
 from utils.algo_utils import TerminationCondition
 import gym
 import evogym.envs
+import numpy as np
+import random
 
 def run(env_name, robots, seed, pop_size, train_iters, ac_type=None, device_num=1):
 
@@ -28,10 +29,21 @@ def run(env_name, robots, seed, pop_size, train_iters, ac_type=None, device_num=
     ppo_args.MULTI=True if len(robots) > 1 else False
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.cuda.set_device(int(ppo_args.device_num))
+    
+    # Seed
+    random.seed(ppo_args.seed)
+    np.random.seed(ppo_args.seed)
+    torch.manual_seed(ppo_args.seed)
+    torch.cuda.manual_seed_all(ppo_args.seed)
+    
+    # Set GPU device
+    if ppo_args.cuda and torch.cuda.is_available() and ppo_args.cuda_deterministic:
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
+    torch.set_num_threads(1)
 
     # Set dimensions
-    train_env = gym.make(env_name, body=robots[0][0], connections=robots[0][1])
-    train_env = modular_env(train_env,robots[0][0])
+    train_env = gym.make(env_name, mode='modular', body=robots[0][0], connections=robots[0][1],env_id=env_name)
     modular_state_dim = train_env.modular_state_dim
     modular_action_dim = train_env.modular_action_dim
     other_feature_size = train_env.other_dim

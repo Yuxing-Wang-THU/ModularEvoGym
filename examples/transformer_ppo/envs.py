@@ -8,7 +8,6 @@ import evogym.envs
 from modular_envs.wrappers.dummy_vec_env import DummyVecEnv
 from modular_envs.wrappers.subproc_vec_env import SubprocVecEnv
 from modular_envs.wrappers.vec_env import VecEnvWrapper
-from modular_envs.wrappers.modular_wrapper import modular_env
 import time 
 from collections import deque,defaultdict
 
@@ -27,18 +26,13 @@ try:
 except ImportError:
     pass
 
-# Derived from
-# https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail
-
 def make_env(env_id, robot_structure, seed, rank):
     def _thunk():
         if env_id.startswith("dm"):
             _, domain, task = env_id.split('.')
             env = dm_control2gym.make(domain_name=domain, task_name=task)
         else:
-            env = gym.make(env_id, body = robot_structure.body, connections = robot_structure.connections)
-            # modular env
-            env = modular_env(env, body=robot_structure.body)
+            env = gym.make(env_id, body = robot_structure.body, connections = robot_structure.connections, mode='modular', env_id=env_id)
 
         env.seed(seed + rank)
         # Identify envs

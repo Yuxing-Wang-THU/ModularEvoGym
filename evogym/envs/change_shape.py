@@ -17,7 +17,14 @@ class ShapeBase(BenchmarkBase):
         super().__init__(world)
 
     def reset(self):
-        
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.nca_setting is not None:
+                return self.nca_reset()
+            else:
+                return self.modular_reset()
+        #################################################
+
         super().reset()
         
         # observation
@@ -77,7 +84,7 @@ class ShapeBase(BenchmarkBase):
 
 class MaximizeShape(ShapeBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'ShapeChange.json'))
@@ -92,8 +99,22 @@ class MaximizeShape(ShapeBase):
 
         self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
         self.observation_space = spaces.Box(low=-100.0, high=100.0, shape=(num_robot_points,), dtype=np.float)
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
 
     def step(self, action):
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
 
         # collect pre step information
         robot_pos_init = self.object_pos_at_time(self.get_time(), "robot")
@@ -108,7 +129,15 @@ class MaximizeShape(ShapeBase):
         obs = np.concatenate((
             self.get_relative_pos_obs("robot"),
             ))
-       
+        
+        ####### Added by Yuxing Wang, Modular observation    
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
+
         # compute reward
         reward = self.get_reward(robot_pos_init, robot_pos_final)
         
@@ -118,7 +147,7 @@ class MaximizeShape(ShapeBase):
             reward -= 3.0
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
     
     def get_reward(self, robot_pos_init, robot_pos_final):
 
@@ -133,10 +162,30 @@ class MaximizeShape(ShapeBase):
         reward = (area_final - area_init) * 10
     
         return reward
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'ShapeChange.json'))
+        self.world.add_from_array('robot', body, 7, 1, connections=connections)
 
+        # init sim
+        ShapeBase.__init__(self, self.world)
+        BenchmarkBase.reset(self)
+
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
+    
 class MinimizeShape(ShapeBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'ShapeChange.json'))
@@ -151,8 +200,22 @@ class MinimizeShape(ShapeBase):
 
         self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
         self.observation_space = spaces.Box(low=-100.0, high=100.0, shape=(num_robot_points,), dtype=np.float)
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
 
     def step(self, action):
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
 
         # collect pre step information
         robot_pos_init = self.object_pos_at_time(self.get_time(), "robot")
@@ -167,7 +230,15 @@ class MinimizeShape(ShapeBase):
         obs = np.concatenate((
             self.get_relative_pos_obs("robot"),
             ))
-       
+        
+        ####### Added by Yuxing Wang, Modular observation    
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
+        
         # compute reward
         reward = self.get_reward(robot_pos_init, robot_pos_final)
         
@@ -177,7 +248,7 @@ class MinimizeShape(ShapeBase):
             reward -= 3.0
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
 
     def get_reward(self, robot_pos_init, robot_pos_final):
 
@@ -192,10 +263,30 @@ class MinimizeShape(ShapeBase):
         reward = (area_init - area_final) * 10
     
         return reward
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'ShapeChange.json'))
+        self.world.add_from_array('robot', body, 7, 1, connections=connections)
 
+        # init sim
+        ShapeBase.__init__(self, self.world)
+        BenchmarkBase.reset(self)
+
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
+    
 class MaximizeXShape(ShapeBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'ShapeChange.json'))
@@ -210,8 +301,22 @@ class MaximizeXShape(ShapeBase):
 
         self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
         self.observation_space = spaces.Box(low=-100.0, high=100.0, shape=(num_robot_points,), dtype=np.float)
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
 
     def step(self, action):
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
 
         # collect pre step information
         robot_pos_init = self.object_pos_at_time(self.get_time(), "robot")
@@ -226,7 +331,15 @@ class MaximizeXShape(ShapeBase):
         obs = np.concatenate((
             self.get_relative_pos_obs("robot"),
             ))
-       
+        
+        ####### Added by Yuxing Wang, Modular observation   
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
+
         # compute reward
         reward = self.get_reward(robot_pos_init, robot_pos_final)
         
@@ -236,7 +349,7 @@ class MaximizeXShape(ShapeBase):
             reward -= 3.0
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
     
     def get_reward(self, robot_pos_init, robot_pos_final):
         
@@ -252,10 +365,30 @@ class MaximizeXShape(ShapeBase):
         reward = (span_final - span_initial)
     
         return reward
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'ShapeChange.json'))
+        self.world.add_from_array('robot', body, 7, 1, connections=connections)
 
+        # init sim
+        ShapeBase.__init__(self, self.world)
+        BenchmarkBase.reset(self)
+
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
+    
 class MaximizeYShape(ShapeBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'ShapeChange.json'))
@@ -270,8 +403,22 @@ class MaximizeYShape(ShapeBase):
 
         self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
         self.observation_space = spaces.Box(low=-100.0, high=100.0, shape=(num_robot_points,), dtype=np.float)
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
 
     def step(self, action):
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
 
         # collect pre step information
         robot_pos_init = self.object_pos_at_time(self.get_time(), "robot")
@@ -286,7 +433,15 @@ class MaximizeYShape(ShapeBase):
         obs = np.concatenate((
             self.get_relative_pos_obs("robot"),
             ))
-       
+        
+        ####### Added by Yuxing Wang, Modular observation    
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
+
         # compute reward
         reward = self.get_reward(robot_pos_init, robot_pos_final)
         
@@ -296,7 +451,7 @@ class MaximizeYShape(ShapeBase):
             reward -= 3.0
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
     
     def get_reward(self, robot_pos_init, robot_pos_final):
         
@@ -312,4 +467,24 @@ class MaximizeYShape(ShapeBase):
         reward = (span_final - span_initial)
     
         return reward
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+         # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'ShapeChange.json'))
+        self.world.add_from_array('robot', body, 7, 1, connections=connections)
+
+        # init sim
+        ShapeBase.__init__(self, self.world)
+        BenchmarkBase.reset(self)
+
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
 

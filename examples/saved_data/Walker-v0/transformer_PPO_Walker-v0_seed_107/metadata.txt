@@ -1,12 +1,12 @@
 ENV NAME: Walker-v0
-ROBOT: [[3 3 4 4 4]
+ROBOT_BODY0: [[3 3 4 4 4]
  [1 4 4 4 4]
  [3 4 4 4 4]
  [1 4 4 4 4]
  [3 3 3 3 4]]
 SEED: 107
 POP SIZE: 4
-DEVICE NUM: 0
+DEVICE NUM: 2
 TRAIN ITERS: 1000
 AC TYPE: transformer
 USE POS EMBEDDING: learnt

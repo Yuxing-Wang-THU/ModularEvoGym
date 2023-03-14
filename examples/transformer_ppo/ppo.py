@@ -13,7 +13,7 @@ from .transformer.buffer import Buffer
 import csv
 import gym
 import evogym.envs
-from modular_envs.wrappers.modular_wrapper import modular_env
+import random
 
 # PPO class
 class PPO:
@@ -59,24 +59,13 @@ class PPO:
         except:
             pass
 
-        # Seed
-        np.random.seed(self.args.seed)
-        torch.manual_seed(self.args.seed)
-        torch.cuda.manual_seed_all(self.args.seed)
-        
-        # Set GPU device
-        if self.args.cuda and torch.cuda.is_available() and self.args.cuda_deterministic:
-            torch.backends.cudnn.benchmark = False
-            torch.backends.cudnn.deterministic = True
-        torch.set_num_threads(1)
-
         # Set replay buffer
         self.buffer = self.reset_buffer()
         self.buffer.to(self.device)
 
     def reset_buffer(self):
-        train_env = gym.make(self.args.env_name, body=self.robots_tuple[0][0], connections=self.robots_tuple[0][1])
-        train_env = modular_env(env=train_env, body=self.robots_tuple[0][0])
+        train_env = gym.make(self.args.env_name,mode='modular', body=self.robots_tuple[0][0], 
+                                connections=self.robots_tuple[0][1],env_id=self.args.env_name)
         sequence_size = train_env.voxel_num
         obs_sample = train_env.reset()
         train_env.close()

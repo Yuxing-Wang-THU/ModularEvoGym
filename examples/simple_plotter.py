@@ -35,7 +35,7 @@ def smooth(data, sm=1):
 
 if __name__ == "__main__":
     game = "Walker-v0"
-    algos = ['transformer_PPO']
+    algos = ['transformer_PPO','fc_PPO']
     fig = plt.figure(figsize=(7,4))
     datas = []
 
@@ -56,4 +56,4 @@ if __name__ == "__main__":
     plt.rcParams.update({'font.size': 9.5})
     plt.legend()
     plt.tight_layout()
-    plt.savefig(f"{game}_training_curves.png", dpi=600,pad_inches=0.0)
+    plt.savefig(f"./{game}_training_curves.png", dpi=600,pad_inches=0.0)

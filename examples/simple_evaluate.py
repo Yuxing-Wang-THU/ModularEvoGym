@@ -10,9 +10,12 @@ import evogym.envs
 
 EXPERIMENT_PARENT_DIR = os.path.join(root_dir, 'visual')
 
-def save_robot_gif(env_name):
-    save_path_structure = os.path.join(EXPERIMENT_PARENT_DIR, "structure.npz")
-    save_path_controller = os.path.join(EXPERIMENT_PARENT_DIR, "controller.pt")
+# CPU is slow, GPU would be better ^_^
+device = torch.device("cpu")
+
+def evaluate(env_name):
+    save_path_structure = os.path.join(EXPERIMENT_PARENT_DIR, f"{env_name}.npz")
+    save_path_controller = os.path.join(EXPERIMENT_PARENT_DIR, f"{env_name}.pt")
 
     structure_data = np.load(save_path_structure)
     structure = []
@@ -21,11 +24,12 @@ def save_robot_gif(env_name):
     structure = tuple(structure)
     robot = Structure(*structure, 0) 
 
-    env = make_vec_envs(env_name, [robot], seed=1, gamma=None, device='cpu', ret=False, ob=True)
+    env = make_vec_envs(env_name, [robot], seed=1, gamma=None, device=device, ret=False, ob=True)
                     
-    uni_agent, obs_rms = torch.load(save_path_controller, map_location='cpu')
+    uni_agent, obs_rms = torch.load(save_path_controller, map_location=device)
     uni_agent.eval()
-    uni_agent.to('cpu')
+    uni_agent.to(device)
+    uni_agent.ac.device=device
 
     vec_norm = helper.get_vec_normalize(env)
     if vec_norm is not None:
@@ -33,12 +37,14 @@ def save_robot_gif(env_name):
         vec_norm.ob_rms = obs_rms
 
     obs = env.reset()
+    obs['stage'] = torch.from_numpy(np.array([1.0]))
     eval_episode_rewards = []
     # Rollout
     while True:
         with torch.no_grad():
             val, action, logp,  = uni_agent.uni_act(obs, mean_action=True)
         obs, reward, done, infos = env.step(action)
+        obs['stage'] = torch.from_numpy(np.array([1.0]))
         for info in infos:
             if 'episode' in info.keys():
                 eval_episode_rewards.append(info['episode']['r'])
@@ -51,6 +57,6 @@ def save_robot_gif(env_name):
     
 if __name__ == '__main__':
     env_name = 'Walker-v0'
-    save_robot_gif(env_name)
+    evaluate(env_name)
 
    

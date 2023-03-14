@@ -56,7 +56,13 @@ class PackageBase(BenchmarkBase):
         return reward
 
     def reset(self):
-        
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.nca_setting is not None:
+                return self.nca_reset()
+            else:
+                return self.modular_reset()
+        #################################################
         super().reset()
 
         # observation
@@ -76,7 +82,7 @@ class PackageBase(BenchmarkBase):
 
 class CarrySmallRect(PackageBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
         
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Carrier-v0.json'))
@@ -94,6 +100,13 @@ class CarrySmallRect(PackageBase):
 
         # threshhold height
         self.thresh_height = 3.0*self.VOXEL_SIZE
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
 
     def get_reward_carry(self, package_pos_init, package_pos_final, robot_pos_init, robot_pos_final):
         
@@ -114,6 +127,13 @@ class CarrySmallRect(PackageBase):
         return reward
 
     def step(self, action):
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
 
         # collect pre step information
         package_pos_init = self.object_pos_at_time(self.get_time(), "package")
@@ -134,7 +154,15 @@ class CarrySmallRect(PackageBase):
             obs,
             self.get_relative_pos_obs("robot"),
         ))
-       
+        
+        ####### Added by Yuxing Wang, Modular observation    
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
+
         # compute reward
         reward = self.get_reward_carry(package_pos_init, package_pos_final, robot_pos_init, robot_pos_final)
 
@@ -150,11 +178,30 @@ class CarrySmallRect(PackageBase):
             reward += 1.0
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Carrier-v0.json'))
+        self.world.add_from_array('robot', body, 1, 1, connections=connections)
 
+        # init sim
+        PackageBase.__init__(self, self.world)
+        EvoGymBase.reset(self)
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
+    
 class CarrySmallRectToTable(PackageBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Carrier-v1.json'))
@@ -172,6 +219,13 @@ class CarrySmallRectToTable(PackageBase):
 
         # threshhold height
         self.thresh_height = 6.0*self.VOXEL_SIZE
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
 
     def get_reward_carry(self, package_pos_init, package_pos_final, robot_pos_init, robot_pos_final):
         
@@ -196,7 +250,13 @@ class CarrySmallRectToTable(PackageBase):
         return reward
 
     def step(self, action):
-
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
         # collect pre step information
         package_pos_init = self.object_pos_at_time(self.get_time(), "package")
         robot_pos_init = self.object_pos_at_time(self.get_time(), "robot")
@@ -216,7 +276,15 @@ class CarrySmallRectToTable(PackageBase):
             obs,
             self.get_relative_pos_obs("robot"),
         ))
-       
+        
+        ####### Added by Yuxing Wang, Modular observation   
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
+
         # compute reward
         reward = self.get_reward_carry(package_pos_init, package_pos_final, robot_pos_init, robot_pos_final)
        
@@ -226,11 +294,30 @@ class CarrySmallRectToTable(PackageBase):
             reward -= 3.0
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Carrier-v1.json'))
+        self.world.add_from_array('robot', body, 1, 4, connections=connections)
+
+        # init sim
+        PackageBase.__init__(self, self.world)
+        EvoGymBase.reset(self)
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
 
 class PushSmallRect(PackageBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None,mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Pusher-v0.json'))
@@ -248,8 +335,22 @@ class PushSmallRect(PackageBase):
 
         # threshhold height
         self.thresh_height = 0.0*self.VOXEL_SIZE
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
 
     def step(self, action):
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
 
         # collect pre step information
         package_pos_init = self.object_pos_at_time(self.get_time(), "package")
@@ -270,6 +371,14 @@ class PushSmallRect(PackageBase):
             obs,
             self.get_relative_pos_obs("robot"),
         ))
+        
+        ####### Added by Yuxing Wang, Modular observation   
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
 
         # compute reward
         reward = super().get_reward(package_pos_init, package_pos_final, robot_pos_init, robot_pos_final)
@@ -286,11 +395,30 @@ class PushSmallRect(PackageBase):
             reward += 1.0
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Pusher-v0.json'))
+        self.world.add_from_array('robot', body, 1, 1, connections=connections)
+
+        # init sim
+        PackageBase.__init__(self, self.world)
+        EvoGymBase.reset(self)
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
 
 class PushSmallRectOnOppositeSide(PackageBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Pusher-v1.json'))
@@ -308,9 +436,22 @@ class PushSmallRectOnOppositeSide(PackageBase):
 
         # threshhold height
         self.thresh_height = 0.0*self.VOXEL_SIZE
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
 
     def step(self, action):
-
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
         # collect pre step information
         package_pos_init = self.object_pos_at_time(self.get_time(), "package")
         robot_pos_init = self.object_pos_at_time(self.get_time(), "robot")
@@ -330,6 +471,14 @@ class PushSmallRectOnOppositeSide(PackageBase):
             obs,
             self.get_relative_pos_obs("robot"),
         ))
+        
+        ####### Added by Yuxing Wang, Modular observation   
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
 
         # compute reward
         reward = super().get_reward(package_pos_init, package_pos_final, robot_pos_init, robot_pos_final)
@@ -346,11 +495,30 @@ class PushSmallRectOnOppositeSide(PackageBase):
             reward += 1.0
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Pusher-v1.json'))
+        self.world.add_from_array('robot', body, 13, 1, connections=connections)
+
+        # init sim
+        PackageBase.__init__(self, self.world)
+        EvoGymBase.reset(self)
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
 
 class ThrowSmallRect(PackageBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Thrower-v0.json'))
@@ -368,6 +536,13 @@ class ThrowSmallRect(PackageBase):
 
         # threshhold height
         self.thresh_height = 0.0*self.VOXEL_SIZE
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
 
     def get_reward_throw(self, robot_pos_init, robot_pos_final, package_pos_init, package_pos_final):
         
@@ -386,6 +561,13 @@ class ThrowSmallRect(PackageBase):
         return reward
 
     def step(self, action):
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
 
         # collect pre step information
         package_pos_init = self.object_pos_at_time(self.get_time(), "package")
@@ -406,7 +588,15 @@ class ThrowSmallRect(PackageBase):
             obs,
             self.get_relative_pos_obs("robot"),
         ))
-       
+        
+        ####### Added by Yuxing Wang, Modular observation   
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
+
         # compute reward
         reward = self.get_reward_throw(robot_pos_init, robot_pos_final, package_pos_init, package_pos_final)
         
@@ -416,17 +606,43 @@ class ThrowSmallRect(PackageBase):
             reward -= 3.0
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Thrower-v0.json'))
+        self.world.add_from_array('robot', body, 1, 1, connections=connections)
+
+        # init sim
+        PackageBase.__init__(self, self.world)
+        EvoGymBase.reset(self)
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
 
 class CatchSmallRect(PackageBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         self.robot_body = body
         self.robot_connections = connections
 
         self.random_init()
- 
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
+
     def random_init(self):
         
         # make world
@@ -466,6 +682,45 @@ class CatchSmallRect(PackageBase):
         # threshhold height
         self.thresh_height = 5.0*self.VOXEL_SIZE
     
+    def random_init2(self):
+        from evogym.utils import get_full_connectivity
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Walker-v0.json'))
+        self.world.add_from_array('robot', self.body, 22, 1, connections=get_full_connectivity(self.body))
+
+        self.offsetx = random.randint(-6, 4)
+        self.offsety = random.randint(0, 5)
+
+        package = WorldObject.from_json(os.path.join(self.DATA_PATH, 'package.json'))
+        package.set_pos(21+self.offsetx, 41+self.offsety)
+        package.rename('package')
+        self.world.add_object(package)
+        
+        peg1 = WorldObject.from_json(os.path.join(self.DATA_PATH, 'peg.json'))
+        peg1.set_pos(17+self.offsetx, 39+self.offsety)
+        peg1.rename('peg1')
+        self.world.add_object(peg1)
+
+        peg2 = WorldObject.from_json(os.path.join(self.DATA_PATH, 'peg.json'))
+        peg2.set_pos(19+self.offsetx, 25+self.offsety)
+        peg2.rename('peg2')
+        self.world.add_object(peg2)
+
+        # init sim
+        PackageBase.__init__(self, self.world)
+        
+        self.default_viewer.track_objects('robot', 'package')
+
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        num_robot_points = self.object_pos_at_time(self.get_time(), "robot").size
+
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.observation_space = spaces.Box(low=-100.0, high=100.0, shape=(7 + num_robot_points,), dtype=np.float)
+
+        # threshhold height
+        self.thresh_height = 5.0*self.VOXEL_SIZE
+
     def get_obs_catch(self, robot_pos_final, package_pos_final):
         
         robot_com_pos = np.mean(robot_pos_final, axis=1)
@@ -495,6 +750,13 @@ class CatchSmallRect(PackageBase):
         return reward
 
     def step(self, action):
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
 
         # collect pre step information
         package_pos_init = self.object_pos_at_time(self.get_time(), "package")
@@ -516,7 +778,15 @@ class CatchSmallRect(PackageBase):
             self.get_ort_obs("package"),
             self.get_relative_pos_obs("robot"),
         ))
-       
+        
+        ####### Added by Yuxing Wang, Modular observation   
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
+
         # compute reward
         reward = self.get_reward_catch(robot_pos_init, robot_pos_final, package_pos_init, package_pos_final)
 
@@ -526,10 +796,20 @@ class CatchSmallRect(PackageBase):
             reward -= 3.0
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
 
     def reset(self):
-        
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.nca_setting is not None:
+                return self.nca_reset()
+            else:
+                EvoGymBase.reset(self)
+                self.default_viewer.hide_debug_window()
+                self.random_init2()
+                return self.modular_reset()
+        #################################################
+
         EvoGymBase.reset(self)
         self.default_viewer.hide_debug_window()
         self.random_init()
@@ -559,10 +839,54 @@ class CatchSmallRect(PackageBase):
         ))
 
         return obs
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Walker-v0.json'))
+        self.world.add_from_array('robot', body, 22, 1, connections=connections)
+
+        self.offsetx = random.randint(-6, 4)
+        self.offsety = random.randint(0, 5)
+
+        package = WorldObject.from_json(os.path.join(self.DATA_PATH, 'package.json'))
+        package.set_pos(21+self.offsetx, 41+self.offsety)
+        package.rename('package')
+        self.world.add_object(package)
+        
+        peg1 = WorldObject.from_json(os.path.join(self.DATA_PATH, 'peg.json'))
+        peg1.set_pos(17+self.offsetx, 39+self.offsety)
+        peg1.rename('peg1')
+        self.world.add_object(peg1)
+
+        peg2 = WorldObject.from_json(os.path.join(self.DATA_PATH, 'peg.json'))
+        peg2.set_pos(19+self.offsetx, 25+self.offsety)
+        peg2.rename('peg2')
+        self.world.add_object(peg2)
+
+        # init sim
+        PackageBase.__init__(self, self.world)
+        
+        self.default_viewer.track_objects('robot', 'package')
+
+        # threshhold height
+        self.thresh_height = 5.0*self.VOXEL_SIZE
+
+        EvoGymBase.reset(self)
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
 
 class ToppleBeam(PackageBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'BeamToppler-v0.json'))
@@ -583,7 +907,14 @@ class ToppleBeam(PackageBase):
 
         #tracking
         self.default_viewer.track_objects('robot', 'beam')
-    
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
+
     def get_obs_topple(self, robot_pos_final, beam_pos_final):
 
         beam_com_pos_final = np.mean(beam_pos_final, axis=1)
@@ -617,6 +948,13 @@ class ToppleBeam(PackageBase):
         return reward, task_complete
 
     def step(self, action):
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
 
         # collect pre step information
         beam_pos_init = self.object_pos_at_time(self.get_time(), "beam")
@@ -638,7 +976,15 @@ class ToppleBeam(PackageBase):
             self.get_ort_obs("beam"),
             self.get_relative_pos_obs("robot"),
         ))
-       
+        
+        ####### Added by Yuxing Wang, Modular observation   
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
+
         # compute reward
         reward, task_complete = self.get_reward_topple(robot_pos_init, robot_pos_final, beam_pos_init, beam_pos_final)
         
@@ -652,10 +998,17 @@ class ToppleBeam(PackageBase):
             done = True
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
 
     def reset(self):
-        
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.nca_setting is not None:
+                return self.nca_reset()
+            else:
+                return self.modular_reset()
+        #################################################
+
         EvoGymBase.reset(self)
 
         # observation
@@ -672,10 +1025,30 @@ class ToppleBeam(PackageBase):
         ))
 
         return obs
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'BeamToppler-v0.json'))
+        self.world.add_from_array('robot', body, 1, 1, connections=connections)
+
+        # init sim
+        PackageBase.__init__(self, self.world)
+
+        EvoGymBase.reset(self)
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
 
 class SlideBeam(PackageBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'BeamSlider-v0.json'))
@@ -696,6 +1069,13 @@ class SlideBeam(PackageBase):
 
         # tracking
         self.default_viewer.track_objects('robot', 'beam')
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
 
     def get_obs_topple(self, robot_pos_final, beam_pos_final):
 
@@ -726,6 +1106,14 @@ class SlideBeam(PackageBase):
         return reward, task_complete
 
     def step(self, action):
+        
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
 
         # collect pre step information
         beam_pos_init = self.object_pos_at_time(self.get_time(), "beam")
@@ -747,7 +1135,15 @@ class SlideBeam(PackageBase):
             self.get_ort_obs("beam"),
             self.get_relative_pos_obs("robot"),
         ))
-       
+        
+        ####### Added by Yuxing Wang, Modular observation   
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
+
         # compute reward
         reward, task_complete = self.get_reward_topple(robot_pos_init, robot_pos_final, beam_pos_init, beam_pos_final)
         
@@ -761,10 +1157,17 @@ class SlideBeam(PackageBase):
             done = True
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
 
     def reset(self):
-        
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.nca_setting is not None:
+                return self.nca_reset()
+            else:
+                return self.modular_reset()
+        #################################################
+
         EvoGymBase.reset(self)
 
         # observation
@@ -781,10 +1184,29 @@ class SlideBeam(PackageBase):
         ))
 
         return obs
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'BeamSlider-v0.json'))
+        self.world.add_from_array('robot', body, 1, 1, connections=connections)
+
+        # init sim
+        PackageBase.__init__(self, self.world)
+        EvoGymBase.reset(self)
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 
 
 class LiftSmallRect(PackageBase):
 
-    def __init__(self, body, connections=None):
+    def __init__(self, body, connections=None, mode=None, nca_setting=None, init_nca_design=None, env_id=None):
 
         # make world
         self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Lifter-v0.json'))
@@ -799,6 +1221,13 @@ class LiftSmallRect(PackageBase):
 
         self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
         self.observation_space = spaces.Box(low=-100.0, high=100.0, shape=(7 + num_robot_points,), dtype=np.float)
+        
+        ####### Added by Yuxing Wang
+        self.mode = mode
+        self.env_id = env_id
+        if self.mode == "modular":
+            self.set_modular_attributes(body, nca_setting, init_nca_design)
+        #################################################
 
     def get_reward_lift(self, robot_pos_init, robot_pos_final, package_pos_init, package_pos_final):
         
@@ -822,6 +1251,13 @@ class LiftSmallRect(PackageBase):
         return reward
 
     def step(self, action):
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.stage == 'design':
+                return self.design_step(action)
+            elif self.stage == 'act':
+                action = action[~self.act_mask.astype(bool)] 
+        #################################################
 
         # collect pre step information
         package_pos_init = self.object_pos_at_time(self.get_time(), "package")
@@ -843,7 +1279,15 @@ class LiftSmallRect(PackageBase):
             self.get_ort_obs("package"),
             self.get_relative_pos_obs("robot"),
         ))
-       
+        
+        ####### Added by Yuxing Wang, Modular observation   
+        if self.mode == "modular":
+            obs = self.get_modular_obs()
+            obs['stage'] = [1.0]
+            if self.nca_setting is not None:
+                obs['design'] = self.make_design_batch(self.act_stage_design)
+        #################################################
+
         # compute reward
         reward = self.get_reward_lift(robot_pos_init, robot_pos_final, package_pos_init, package_pos_final)
 
@@ -853,10 +1297,17 @@ class LiftSmallRect(PackageBase):
             reward -= 3.0
 
         # observation, reward, has simulation met termination conditions, debugging info
-        return obs, reward, done, {}
+        return obs, reward, done, {'design_success': True, 'stage': 'act'}
     
     def reset(self):
-        
+        ####### Added by Yuxing Wang
+        if self.mode == "modular":
+            if self.nca_setting is not None:
+                return self.nca_reset()
+            else:
+                return self.modular_reset()
+        #################################################
+
         EvoGymBase.reset(self)
 
         # observation
@@ -873,4 +1324,22 @@ class LiftSmallRect(PackageBase):
         ))
 
         return obs
-        
+    
+    ####### Added by Yuxing Wang, reload the world
+    def update(self,body,connections):
+        # make world
+        self.world = EvoWorld.from_json(os.path.join(self.DATA_PATH, 'Lifter-v0.json'))
+        self.world.add_from_array('robot', body, 2, 3, connections=connections)
+
+        # init sim
+        PackageBase.__init__(self, self.world)
+        EvoGymBase.reset(self)
+        # set action space and observation space
+        num_actuators = self.get_actuator_indices('robot').size
+        self.action_space = spaces.Box(low= 0.6, high=1.6, shape=(num_actuators,), dtype=np.float)
+        self.body = body
+        self.voxel_num = self.body.size   
+        self.obs_index_array, self.voxel_corner_size = self.transform_to_modular_obs(body=self.body)
+        self.act_mask = self.get_act_mask(self.body)
+        self.obs_mask = self.get_obs_mask(self.body)  
+        return self.get_modular_obs() 

@@ -49,7 +49,39 @@ BASELINE_ENV_NAMES = [
     'Balancer-v1'
     ]
 
-
+MODULAR_ENV_NAMES = [
+       'Walker-v0',
+    'BridgeWalker-v0',
+    'Carrier-v0',
+    'Carrier-v1',
+    'Pusher-v0',
+    'Pusher-v1',
+    'Thrower-v0',
+    'Catcher-v0',
+    'BeamToppler-v0',
+    'BeamSlider-v0',
+    'Lifter-v0',
+    'Climber-v0',
+    'Climber-v1',
+    'Climber-v2',
+    'UpStepper-v0',
+    'DownStepper-v0',
+    'ObstacleTraverser-v0',
+    'ObstacleTraverser-v1',
+    'Hurdler-v0',
+    'PlatformJumper-v0',
+    'GapJumper-v0',
+    'Traverser-v0',
+    'CaveCrawler-v0',
+    'AreaMaximizer-v0',
+    'AreaMinimizer-v0',
+    'WingspanMazimizer-v0',
+    'HeightMaximizer-v0',
+    'Flipper-v0',
+    'Jumper-v0',
+    'Balancer-v0',
+    'Balancer-v1'
+    ]
 ### PROBABILITY AND RANDOM ROBOT SAMPLING ###
 
 def get_uniform(x: int) -> np.ndarray:

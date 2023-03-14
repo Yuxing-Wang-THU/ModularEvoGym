@@ -1,0 +1,35 @@
+ENV NAME: Walker-v0
+ROBOT_BODY0: [[1. 4. 3. 0. 4.]
+ [2. 2. 2. 1. 3.]
+ [0. 2. 3. 2. 0.]
+ [0. 0. 4. 4. 1.]
+ [0. 0. 1. 0. 4.]]
+ROBOT_BODY1: [[3. 4. 3. 4. 3.]
+ [3. 0. 0. 3. 0.]
+ [0. 0. 4. 1. 0.]
+ [4. 4. 2. 1. 3.]
+ [4. 3. 2. 4. 4.]]
+ROBOT_BODY2: [[2. 2. 2. 0. 3.]
+ [0. 0. 3. 0. 2.]
+ [0. 1. 2. 1. 1.]
+ [1. 1. 0. 1. 4.]
+ [1. 3. 0. 1. 2.]]
+ROBOT_BODY3: [[2. 0. 0. 4. 0.]
+ [1. 1. 2. 2. 1.]
+ [0. 4. 0. 2. 0.]
+ [0. 4. 2. 2. 4.]
+ [4. 4. 0. 1. 4.]]
+ROBOT_BODY4: [[4. 4. 0. 2. 3.]
+ [3. 4. 3. 2. 0.]
+ [4. 0. 4. 2. 3.]
+ [0. 3. 0. 3. 0.]
+ [3. 3. 4. 4. 4.]]
+SEED: 105
+POP SIZE: 5
+DEVICE NUM: 2
+TRAIN ITERS: 3000
+AC TYPE: transformer
+USE POS EMBEDDING: learnt
+ACT FIXED NOISE: True
+OBS ENCODER: False
+CONDITION DECODER: True

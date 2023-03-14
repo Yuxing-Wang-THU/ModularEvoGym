@@ -1,9 +1,8 @@
 from transformer_ppo.run import run
 import argparse
-import numpy as np
-from evogym import get_full_connectivity, sample_robot
+from evogym import sample_robot
 
-# 5 robots to be controlled simultaneously
+# 5 robots to be controlled
 robot_num = 5
 robots = [sample_robot((5,5)) for _ in range(robot_num)]
 
@@ -16,10 +15,10 @@ if __name__ == "__main__":
                         help='random seed')
     parser.add_argument('--ac_type', type=str, default="transformer",
                         help='(transformer, fc)')
-    parser.add_argument('--device_num', type=int, default=2,
+    parser.add_argument('--device_num', type=int, default=0,
                         help='gpu device id')
     parser.add_argument('--train_iters', type=int, default=3000,
-                        help='training iterations')                             
+                        help='policy iterations')                             
     args = parser.parse_args()
 
     # Run

@@ -30,7 +30,6 @@ def evaluate(
         for info in infos:
             if 'episode' in info.keys():
                 eval_episode_rewards.append(info['episode']['r'])
-                print(eval_episode_rewards)
         # check
         if num_evals*len(init_robots) == len(eval_episode_rewards):
             break
