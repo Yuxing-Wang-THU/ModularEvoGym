@@ -1,7 +1,7 @@
 # **ModularEvoGym**
 A modified benchmark for designing and controlling 2D Voxel-based Soft Robots (VSRs)
 
-<img src="./images/thrower.gif" div align=middle width = "49%" /><img src="./images/Walker.gif" div align=middle width = "49%" />
+<img src="./images/thrower.gif" div align=middle width = "49%" /><img src="./images/bigWalker.gif" div align=middle width = "49%" />
 
 ## **New features**
 ModularEvoGym is compatible with [Evolution Gym](https://github.com/EvolutionGym/evogym) but provides some new features.
@@ -201,7 +201,7 @@ A muscle synergy is the activation of a group of muscles to contribute to a part
 
 Self-attention brings better interpretability than multilayer perceptron. We use only one Transformer encoder layer, thus we visualize the generated attention matrix after one input state passes through the attention layer. The above figure shows attention matrices produced by the control policy network. The color of each attention score tells the strength of the compatibility between inputs and interprets what is driving the current behaviour. When the robot's front foot (voxel $9$) or the rear foot (voxel $7$) touches the ground, the corresponding voxels are assigned with greater wights, which is consistent with humans' intuition and common sense.
 
-### **2. Controlling multiple VSRs using a generalizable controller**
+### **2. Controlling multiple VSRs with a generalizable controller**
 Generalization can be further enhanced by modularization, due to the success of modeling dynamic structures via self-attention. Our Transformer-based controller is able to handle incompatible state-action spaces, thus it is possible to pre-train a powerful policy.
 
 To train some randomly generated robots to walk, cd to the `examples` folder and run the following script:
