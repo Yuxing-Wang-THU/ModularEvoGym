@@ -268,7 +268,7 @@ python run_cuco.py --env Walker-v0 --target_size 7 --train_iters 1000
 Remove the curriculum mechanism:
 
 ```shell
-python run_cuco.py --env Walker-v0 --target_size 7 --rl_only --train_iters 1000
+python run_cuco.py --env Walker-v0 --target_size 7 --rl_only --train_iters 3000
 ```
 
 Learning curves:
