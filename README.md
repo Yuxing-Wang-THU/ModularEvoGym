@@ -240,7 +240,7 @@ To co-design a `Thrower` robot in $5\times5$ design space, cd to the `examples` 
 python run_cuco.py --env Thrower-v0 --target_size 5 --rl_only --train_iters 3000 
 ```
 
-Logs are stored in `examples/saved_data/Thrower-v0`. Here is the learning curves:
+Logs are stored in `examples/saved_data/Thrower-v0`.
 
 <div align=middle><img src="./images/Thrower.png" width = "67%" /></div>
 
