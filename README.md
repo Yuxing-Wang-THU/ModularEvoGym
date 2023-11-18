@@ -1,4 +1,6 @@
 # **ModularEvoGym**
+Note: A new version will be updated soon!
+
 A modified benchmark for designing and controlling 2D Voxel-based Soft Robots (VSRs)
 
 <img src="./images/thrower.gif" div align=middle width = "49%" /><img src="./images/bigWalker.gif" div align=middle width = "49%" />
